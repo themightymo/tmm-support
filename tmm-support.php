@@ -48,7 +48,7 @@ function create_tmm_support_ticket_cpt() {
 		'description'           => __( 'Support Tickets', 'tmm_support' ),
 		'labels'                => $labels,
 		'supports'              => array( 'title', 'editor', 'author', 'thumbnail', 'comments', 'custom-fields', ),
-		'taxonomies'            => array( 'ticket_status_taxonomy' ),
+		'taxonomies'            => array( 'ticket_status' ),
 		'hierarchical'          => false,
 		'public'                => true,
 		'show_ui'               => true,
@@ -56,8 +56,8 @@ function create_tmm_support_ticket_cpt() {
 		'menu_position'         => 5,
 		'menu_icon'             => 'dashicons-heart',
 		'show_in_admin_bar'     => true,
-		'show_in_nav_menus'     => false,
-		'can_export'            => false,
+		'show_in_nav_menus'     => true,
+		'can_export'            => true,
 		'has_archive'           => true,		
 		'exclude_from_search'   => true,
 		'publicly_queryable'    => true,
@@ -105,9 +105,11 @@ function create_ticket_status_taxonomy() {
 		'show_ui'                    => true,
 		'show_admin_column'          => true,
 		'show_in_nav_menus'          => true,
-		'show_tagcloud'              => true,
+		//'show_tagcloud'              => true,
+		//'rewrite'					=> array( 'slug' => 'ticket-status' ),
+		'query_var' => true
 	);
-	register_taxonomy( 'ticket_status_taxonomy', array( 'tmm_support_ticket' ), $args );
+	register_taxonomy( 'ticket_status', array( 'tmm_support_ticket' ), $args );
 
 }
 add_action( 'init', 'create_ticket_status_taxonomy', 0 );
@@ -129,8 +131,9 @@ function display_customer_support_tickets() {
 		'paged'					 => $paged,
 		'posts_per_page'         => '10',
 		'posts_per_archive_page' => '10',
-		'order'                  => 'ASC',
-		'orderby'                => 'modified',
+		'order'                  => 'DESC',
+		//'orderby'                => 'modified',
+		//'orderby_last_comment'	=> true
 	);
 	
 	// The Query
@@ -156,7 +159,7 @@ function display_customer_support_tickets() {
 			<thead>
 				<tr>
 					<th class="subscription-id order-number"><span class="nobr">Support Ticket Title</span></th>
-					<th class="subscription-status order-status"><span class="nobr">Last Response Date</span></th>
+					<th class="subscription-status order-status"><span class="nobr">Last Activity Date</span></th>
 					<th class="subscription-next-payment order-date"><span class="nobr">Status</span></th>
 				</tr>
 			</thead>
@@ -185,7 +188,7 @@ function display_customer_support_tickets() {
 
 						<tr class="order">
 							<td class="subscription-id order-number">
-								<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+								<a href="<?php the_permalink(); ?>" title="<?php the_excerpt(); ?>"><?php the_title(); ?></a> <?php edit_post_link('edit','[',']'); ?>
 							</td>
 							<td class="subscription-status order-status" style="text-align:left; white-space:nowrap;">
 								<a href="<?php echo get_permalink($comment_post_ID); ?>#comment-<?php echo $comment_ID; ?>" title="By <?php echo $comment_author; ?>: <?php echo $comment_content; ?>"><?php echo $comment_date; ?></a>	
@@ -193,7 +196,7 @@ function display_customer_support_tickets() {
 		
 							</td>
 							<td class="subscription-next-payment order-date" data-title="Next Payment">
-								STATUS (Active or Closed)
+								<?php the_terms( $post->ID, 'ticket_status', '', ' / ' ); ?>
 							</td>
 						</tr>
 						<?php 
