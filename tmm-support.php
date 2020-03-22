@@ -4,7 +4,7 @@ Plugin Name: The Mighty Mo! Clients Support Plugin
 Plugin URI: http://www.themightymo.com/
 Description: Adds support ticket functionality
 Author: themightymo
-Version: 1.0
+Version: 1.1
 Author URI: http://www.themightymo.com/
 Text Domain: tmm-support
 License: GPLv2
@@ -109,12 +109,41 @@ function create_ticket_status_taxonomy() {
 		//'rewrite'					=> array( 'slug' => 'ticket-status' ),
 		'query_var' => true
 	);
+	
 	register_taxonomy( 'ticket_status', array( 'tmm_support_ticket' ), $args );
+	
+	/*
+		Now that the "ticket_status" taxonomy has been created, let's define the taxonomy's terms.
+		via https://wordpress.stackexchange.com/a/30819
+	*/
+	// If the "Active" and "Closed" terms don't exist yet, create them.
+	$parent_term = term_exists( 'active', 'closed' ); // array is returned if taxonomy is given
+	$parent_term_id = $parent_term['term_id'];         // get numeric term id
+	wp_insert_term(
+		'Active', // the term 
+		'ticket_status', // the taxonomy
+		array(
+			'description'=> 'Active Ticket',
+			'slug' => 'active',
+			'parent'=> $parent_term['term_id']  // get numeric term id
+		)
+	);
+	wp_insert_term(
+		'Closed', // the term 
+		'ticket_status', // the taxonomy
+		array(
+			'description'=> 'Closed Ticket',
+			'slug' => 'closed',
+			'parent'=> $parent_term['term_id']  // get numeric term id
+		)
+	);
 
+	
 }
 add_action( 'init', 'create_ticket_status_taxonomy', 0 );
-
+	
 }
+
 
 
 // Create function that displays all of the currently-logged-in user's tmm_support_ticket posts on the "My Account" page
@@ -226,7 +255,6 @@ function display_customer_support_tickets() {
 	echo '<div style="margin-bottom:1em;padding:1em;border:3px solid #000;border-radius:10px;">' . do_shortcode ( '[gravityform id="1" title="true" description="true" ajax="true"]' ) . '</div>';
 }
 add_action ('woocommerce_before_my_account', 'display_customer_support_tickets');
-
 
 
 
