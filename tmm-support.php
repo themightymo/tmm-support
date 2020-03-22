@@ -4,7 +4,7 @@ Plugin Name: The Mighty Mo! Clients Support Plugin
 Plugin URI: http://www.themightymo.com/
 Description: Adds support ticket functionality
 Author: themightymo
-Version: 1.1.1
+Version: 1.0
 Author URI: http://www.themightymo.com/
 Text Domain: tmm-support
 License: GPLv2
@@ -167,21 +167,18 @@ function display_customer_support_tickets() {
 	
 	// The Query
 	$query = new WP_Query( $args );
-	/*
-		echo '<pre>';
-		var_dump($query);
-		echo '</pre>';
-	*/
-	// The Loop
+	
+	/* 
+	//Test what's in the $query
 	if ( $query->have_posts() ) {
 		while ( $query->have_posts() ) {
-		/*
+			$query->the_post();
 			echo '<pre>';
 			var_dump($query);
 			echo '</pre>';
-		*/
 		}
 	} 
+	*/
 	
 	// Restore original Post Data
 	wp_reset_postdata();?>
@@ -206,35 +203,41 @@ function display_customer_support_tickets() {
 						$comment_date = null;
 						$comment_content = null;
 						$comments = get_comments( array( 'number' => 1, 'post_id' => get_the_ID() ) ); 
-						/*echo '<pre>';
-						print_r($comments);
-						echo '</pre>';*/
+						/*
+							echo '<pre>';
+							print_r($comments);
+							echo '</pre>';
+						*/
 						foreach($comments as $comment) :
 							$comment_author = $comment->comment_author;
-							$comment_date = $comment->comment_date;
-							$comment_content = $comment->comment_content;
+							$comment_date = date("D M Y h:m A", strtotime($comment->comment_date));
+							$comment_content = substr($comment->comment_content, 0, 50) . '...';
 							$comment_ID = $comment->comment_ID;
 							$comment_post_ID = $comment->comment_post_ID;
 						endforeach;
 						?>
 
 						<tr class="order">
-							<td class="subscription-id order-number">
+							<td class="support-ticket-title">
 								<a href="<?php the_permalink(); ?>" title="<?php the_excerpt(); ?>"><?php the_title(); ?></a> <?php edit_post_link('edit','[',']'); ?>
 							</td>
-							<td class="subscription-status order-status" style="text-align:left; white-space:nowrap;">
+							<td class="support-ticket-last-activity-date" style="text-align:left; white-space:nowrap;">
 								<?php if (!$comments) {
-									echo 'Request submitted on ' . get_the_date() . ' by ' . get_the_author_meta( 'user_firstname', $post->post_author ) . ' ' . get_the_author_meta( 'user_lastname', $post->post_author );
-								} else { ?><a href="<?php echo get_permalink($comment_post_ID); ?>#comment-<?php echo $comment_ID; ?>" title="By <?php echo $comment_author; ?>: <?php echo $comment_content; ?>"><?php echo $comment_date; ?></a><?php } ?>
+									echo 'Request submitted on ' . get_the_date('D M j h:m A') . ' by ' . get_the_author_meta( 'user_firstname', $post->post_author ) . ' ' . get_the_author_meta( 'user_lastname', $post->post_author );
+								} else { ?>
+									<a href="<?php echo get_permalink($comment_post_ID); ?>#comment-<?php echo $comment_ID; ?>" title="By <?php echo $comment_author; ?>: <?php echo $comment_content; ?>"><?php echo $comment_content; ?></a><?php echo ' on ' . $comment_date . ' by ' . $comment_author;
+								} ?>
 								<a href="" rel="external nofollow" title="<?php echo $title; ?>"> <?php echo $title; ?></a>
 		
 							</td>
-							<td class="subscription-next-payment order-date" data-title="Next Payment">
+							<td class="support-ticket-status" data-title="Next Payment">
 								<?php the_terms( $post->ID, 'ticket_status', '', ' / ' ); ?>
 							</td>
 						</tr>
 						<?php 
 					}
+							
+					//Support Ticket Pagination (currently BROKEN)
 					if ($query->max_num_pages > 1) { // check if the max number of pages is greater than 1  ?>
 						<nav class="prev-next-posts">
 							<div class="prev-posts-link">
@@ -260,7 +263,5 @@ function display_customer_support_tickets() {
 	echo '<div style="margin-bottom:1em;padding:1em;border:3px solid #000;border-radius:10px;">' . do_shortcode ( '[gravityform id="1" title="true" description="true" ajax="false"]' ) . '</div>';
 }
 add_action ('woocommerce_before_my_account', 'display_customer_support_tickets');
-
-
-
+ 
 // Create front-end ticket creation form using ACF
