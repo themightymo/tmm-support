@@ -210,7 +210,7 @@ function display_customer_support_tickets() {
 						*/
 						foreach($comments as $comment) :
 							$comment_author = $comment->comment_author;
-							$comment_date = date("D M Y h:m A", strtotime($comment->comment_date));
+							$comment_date = date("D M j, Y \a\t g:i A", strtotime($comment->comment_date));
 							$comment_content = substr($comment->comment_content, 0, 50) . '...';
 							$comment_ID = $comment->comment_ID;
 							$comment_post_ID = $comment->comment_post_ID;
@@ -223,7 +223,7 @@ function display_customer_support_tickets() {
 							</td>
 							<td class="support-ticket-last-activity-date" style="text-align:left; white-space:nowrap;">
 								<?php if (!$comments) {
-									echo 'Request submitted on ' . get_the_date('D M j h:m A') . ' by ' . get_the_author_meta( 'user_firstname', $post->post_author ) . ' ' . get_the_author_meta( 'user_lastname', $post->post_author );
+									echo 'Request submitted on ' . get_the_date('D M j, Y \a\t g:i A') . ' by ' . get_the_author_meta( 'user_firstname', $post->post_author ) . ' ' . get_the_author_meta( 'user_lastname', $post->post_author );
 								} else { ?>
 									<a href="<?php echo get_permalink($comment_post_ID); ?>#comment-<?php echo $comment_ID; ?>" title="By <?php echo $comment_author; ?>: <?php echo $comment_content; ?>"><?php echo $comment_content; ?></a><?php echo ' on ' . $comment_date . ' by ' . $comment_author;
 								} ?>
@@ -236,7 +236,7 @@ function display_customer_support_tickets() {
 						</tr>
 						<?php 
 					}
-							
+ 
 					//Support Ticket Pagination (currently BROKEN)
 					if ($query->max_num_pages > 1) { // check if the max number of pages is greater than 1  ?>
 						<nav class="prev-next-posts">
@@ -264,4 +264,12 @@ function display_customer_support_tickets() {
 }
 add_action ('woocommerce_before_my_account', 'display_customer_support_tickets');
  
-// Create front-end ticket creation form using ACF
+/*
+	To-do List:
+	* Add a Client ID field to the WP User profile, then filter the tickets by that id, so they'll never see a different client's tickets.
+	* Include Gravity Forms import file
+	* Add better instructions to Readme file.  For example, include instructions on setting up GF with the Advanced Post addon.
+	* Make pagination prettier.
+	* Make it so when they click "Active" or "Closed" taxonomy, it only shows their tickets.
+	* Display "Active" tickets first.
+*/ 
