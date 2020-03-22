@@ -272,4 +272,6 @@ add_action ('woocommerce_before_my_account', 'display_customer_support_tickets')
 	* Make pagination prettier.
 	* Make it so when they click "Active" or "Closed" taxonomy, it only shows their tickets.
 	* Display "Active" tickets first.
+	* Add css to fix table style issues: td{word-wrap:break-word;white-space:normal} table{table-layout:fixed;}
+}
 */ 
