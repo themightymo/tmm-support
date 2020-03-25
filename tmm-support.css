@@ -6,3 +6,6 @@ table {
 td {
 	word-wrap:break-word;
 }
+.closed {
+	background: gray;
+}

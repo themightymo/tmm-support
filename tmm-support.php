@@ -152,6 +152,15 @@ add_action( 'init', 'create_ticket_status_taxonomy', 0 );
 }
 
 
+/* 
+	When a comment is left on a post, update the post's date to that date - 
+	then we'll be able to sort by most-recently commented-on.
+	via https://wordpress.stackexchange.com/a/154506
+*/
+function update_post_modified_date(  $comment_id, $comment ) {
+	wp_update_post( array( 'ID' => $comment->comment_post_ID ) );
+}
+add_action( 'wp_insert_comment', 'update_post_modified_date', 10, 2 );
 
 // Create function that displays all of the currently-logged-in user's tmm_support_ticket posts on the "My Account" page
 function display_customer_support_tickets() {
@@ -167,8 +176,12 @@ function display_customer_support_tickets() {
 		'paged'					 => $paged,
 		'posts_per_page'         => '10',
 		'posts_per_archive_page' => '10',
-		'order'                  => 'DESC',
+		//'order'                  => 'DESC',
 		//'orderby'                => 'modified',
+		'orderby' => array( 
+			'modified'	=> 'DESC',
+		),
+		
 		//'orderby_last_comment'	=> true
 	);
 	
@@ -223,8 +236,13 @@ function display_customer_support_tickets() {
 							$comment_post_ID = $comment->comment_post_ID;
 						endforeach;
 						?>
-
-						<tr class="order">
+						<?php 
+							$ticket_statuses = get_the_terms( $post->ID, 'ticket_status' );
+							foreach($ticket_statuses as $ticket_status) {
+								$ticket_status = $ticket_status->name; 
+							}
+						?>
+						<tr class="order<?php if ( $ticket_status == 'Active' ) { echo ' active'; } else { echo ' closed'; } ?>">
 							<td class="support-ticket-title">
 								<a href="<?php the_permalink(); ?>" title="<?php the_excerpt(); ?>"><?php the_title(); ?></a> <?php edit_post_link('edit','[',']'); ?>
 							</td>
@@ -234,10 +252,9 @@ function display_customer_support_tickets() {
 								} else { ?>
 									<a href="<?php echo get_permalink($comment_post_ID); ?>#comment-<?php echo $comment_ID; ?>" title="By <?php echo $comment_author; ?>: <?php echo $comment_content; ?>"><?php echo $comment_content; ?></a><?php echo ' on ' . $comment_date . ' by ' . $comment_author;
 								} ?>
-								<a href="" rel="external nofollow" title="<?php echo $title; ?>"> <?php echo $title; ?></a>
-		
+								
 							</td>
-							<td class="support-ticket-status" data-title="Next Payment">
+							<td class="support-ticket-status data-title="Next Payment">
 								<?php the_terms( $post->ID, 'ticket_status', '', ' / ' ); ?>
 							</td>
 						</tr>
@@ -270,14 +287,3 @@ function display_customer_support_tickets() {
 	echo '<div style="margin-bottom:1em;padding:1em;border:3px solid #000;border-radius:10px;">' . do_shortcode ( '[gravityform id="1" title="true" description="true" ajax="false"]' ) . '</div>';
 }
 add_action ('woocommerce_before_my_account', 'display_customer_support_tickets');
- 
-/*
-	To-do List:
-	* Add a Client ID field to the WP User profile, then filter the tickets by that id, so they'll never see a different client's tickets.
-	* Include Gravity Forms import file
-	* Add better instructions to Readme file.  For example, include instructions on setting up GF with the Advanced Post addon.
-	* Make pagination prettier.
-	* Make it so when they click "Active" or "Closed" taxonomy, it only shows their tickets.
-	* Display "Active" tickets first.
-}
-*/ 
