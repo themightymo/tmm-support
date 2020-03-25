@@ -17,6 +17,82 @@ function add_tmm_support_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'add_tmm_support_scripts' );
 
+
+
+// Create Ticket Status taxonomy
+if ( ! function_exists( 'create_ticket_status_taxonomy' ) ) {
+
+	// Register Custom Taxonomy
+	function create_ticket_status_taxonomy() {
+	
+		$labels = array(
+			'name'                       => _x( 'Ticket Statuses', 'Taxonomy General Name', 'tmm_support' ),
+			'singular_name'              => _x( 'Ticket Status', 'Taxonomy Singular Name', 'tmm_support' ),
+			'menu_name'                  => __( 'Ticket Status', 'tmm_support' ),
+			'all_items'                  => __( 'All Ticket Statuses', 'tmm_support' ),
+			'parent_item'                => __( 'Parent Ticket Status', 'tmm_support' ),
+			'parent_item_colon'          => __( 'Parent Ticket Status:', 'tmm_support' ),
+			'new_item_name'              => __( 'New Ticket Status Name', 'tmm_support' ),
+			'add_new_item'               => __( 'Add New Ticket Status', 'tmm_support' ),
+			'edit_item'                  => __( 'Edit Ticket Status', 'tmm_support' ),
+			'update_item'                => __( 'Update Ticket Status', 'tmm_support' ),
+			'view_item'                  => __( 'View Ticket Status', 'tmm_support' ),
+			'separate_items_with_commas' => __( 'Separate Ticket Statuses with commas', 'tmm_support' ),
+			'add_or_remove_items'        => __( 'Add or remove Ticket Statuses', 'tmm_support' ),
+			'choose_from_most_used'      => __( 'Choose from the most used', 'tmm_support' ),
+			'popular_items'              => __( 'Popular Ticket Statuses', 'tmm_support' ),
+			'search_items'               => __( 'Search Ticket Statuses', 'tmm_support' ),
+			'not_found'                  => __( 'Not Found', 'tmm_support' ),
+			'no_terms'                   => __( 'No Ticket Statuses', 'tmm_support' ),
+			'items_list'                 => __( 'Ticket Statuses list', 'tmm_support' ),
+			'items_list_navigation'      => __( 'Ticket Statuses list navigation', 'tmm_support' ),
+		);
+		$args = array(
+			'labels'                     => $labels,
+			'hierarchical'               => true,
+			'public'                     => true,
+			'show_ui'                    => true,
+			'show_admin_column'          => true,
+			'show_in_nav_menus'          => true,
+			//'show_tagcloud'              => true,
+			//'rewrite'					=> array( 'slug' => 'ticket-status' ),
+			'query_var' => true
+		);
+		
+		register_taxonomy( 'ticket_status', array( 'tmm_support_ticket' ), $args );
+		
+		/*
+			Now that the "ticket_status" taxonomy has been created, let's define the taxonomy's terms.
+			via https://wordpress.stackexchange.com/a/30819
+		*/
+		// If the "Active" and "Closed" terms don't exist yet, create them.
+		$parent_term = term_exists( 'active', 'closed' ); // array is returned if taxonomy is given
+		$parent_term_id = $parent_term['term_id'];         // get numeric term id
+		wp_insert_term(
+			'Active', // the term 
+			'ticket_status', // the taxonomy
+			array(
+				'description'=> 'Active Ticket',
+				'slug' => 'active',
+				'parent'=> $parent_term['term_id']  // get numeric term id
+			)
+		);
+		wp_insert_term(
+			'Closed', // the term 
+			'ticket_status', // the taxonomy
+			array(
+				'description'=> 'Closed Ticket',
+				'slug' => 'closed',
+				'parent'=> $parent_term['term_id']  // get numeric term id
+			)
+		);
+	
+		
+	}
+	add_action( 'init', 'create_ticket_status_taxonomy', 0 );
+	
+}
+
 // Create "tmm_support_ticket" post type
 if ( ! function_exists('create_tmm_support_ticket_cpt') ) {
 
@@ -77,79 +153,6 @@ add_action( 'init', 'create_tmm_support_ticket_cpt', 0 );
 
 }
 
-// Create Ticket Status taxonomy
-if ( ! function_exists( 'create_ticket_status_taxonomy' ) ) {
-
-// Register Custom Taxonomy
-function create_ticket_status_taxonomy() {
-
-	$labels = array(
-		'name'                       => _x( 'Ticket Statuses', 'Taxonomy General Name', 'tmm_support' ),
-		'singular_name'              => _x( 'Ticket Status', 'Taxonomy Singular Name', 'tmm_support' ),
-		'menu_name'                  => __( 'Ticket Status', 'tmm_support' ),
-		'all_items'                  => __( 'All Ticket Statuses', 'tmm_support' ),
-		'parent_item'                => __( 'Parent Ticket Status', 'tmm_support' ),
-		'parent_item_colon'          => __( 'Parent Ticket Status:', 'tmm_support' ),
-		'new_item_name'              => __( 'New Ticket Status Name', 'tmm_support' ),
-		'add_new_item'               => __( 'Add New Ticket Status', 'tmm_support' ),
-		'edit_item'                  => __( 'Edit Ticket Status', 'tmm_support' ),
-		'update_item'                => __( 'Update Ticket Status', 'tmm_support' ),
-		'view_item'                  => __( 'View Ticket Status', 'tmm_support' ),
-		'separate_items_with_commas' => __( 'Separate Ticket Statuses with commas', 'tmm_support' ),
-		'add_or_remove_items'        => __( 'Add or remove Ticket Statuses', 'tmm_support' ),
-		'choose_from_most_used'      => __( 'Choose from the most used', 'tmm_support' ),
-		'popular_items'              => __( 'Popular Ticket Statuses', 'tmm_support' ),
-		'search_items'               => __( 'Search Ticket Statuses', 'tmm_support' ),
-		'not_found'                  => __( 'Not Found', 'tmm_support' ),
-		'no_terms'                   => __( 'No Ticket Statuses', 'tmm_support' ),
-		'items_list'                 => __( 'Ticket Statuses list', 'tmm_support' ),
-		'items_list_navigation'      => __( 'Ticket Statuses list navigation', 'tmm_support' ),
-	);
-	$args = array(
-		'labels'                     => $labels,
-		'hierarchical'               => true,
-		'public'                     => true,
-		'show_ui'                    => true,
-		'show_admin_column'          => true,
-		'show_in_nav_menus'          => true,
-		//'show_tagcloud'              => true,
-		//'rewrite'					=> array( 'slug' => 'ticket-status' ),
-		'query_var' => true
-	);
-	
-	register_taxonomy( 'ticket_status', array( 'tmm_support_ticket' ), $args );
-	
-	/*
-		Now that the "ticket_status" taxonomy has been created, let's define the taxonomy's terms.
-		via https://wordpress.stackexchange.com/a/30819
-	*/
-	// If the "Active" and "Closed" terms don't exist yet, create them.
-	$parent_term = term_exists( 'active', 'closed' ); // array is returned if taxonomy is given
-	$parent_term_id = $parent_term['term_id'];         // get numeric term id
-	wp_insert_term(
-		'Active', // the term 
-		'ticket_status', // the taxonomy
-		array(
-			'description'=> 'Active Ticket',
-			'slug' => 'active',
-			'parent'=> $parent_term['term_id']  // get numeric term id
-		)
-	);
-	wp_insert_term(
-		'Closed', // the term 
-		'ticket_status', // the taxonomy
-		array(
-			'description'=> 'Closed Ticket',
-			'slug' => 'closed',
-			'parent'=> $parent_term['term_id']  // get numeric term id
-		)
-	);
-
-	
-}
-add_action( 'init', 'create_ticket_status_taxonomy', 0 );
-	
-}
 
 
 /* 
