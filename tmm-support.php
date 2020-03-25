@@ -172,17 +172,12 @@ function display_customer_support_tickets() {
 	$args = array (
 		'post_type'              => array( 'tmm_support_ticket' ),
 		'author'                 => $current_user->ID,
-		//'nopaging'               => false,
 		'paged'					 => $paged,
 		'posts_per_page'         => '10',
 		'posts_per_archive_page' => '10',
-		//'order'                  => 'DESC',
-		//'orderby'                => 'modified',
 		'orderby' => array( 
 			'modified'	=> 'DESC',
 		),
-		
-		//'orderby_last_comment'	=> true
 	);
 	
 	// The Query
