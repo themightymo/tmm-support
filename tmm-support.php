@@ -10,6 +10,13 @@ Text Domain: tmm-support
 License: GPLv2
 */
 
+// Load stylesheet
+function add_tmm_support_scripts() {
+	wp_register_style( 'tmm-support-css',  plugin_dir_url( __FILE__ ) . 'tmm-support.css' );
+	wp_enqueue_style( 'tmm-support-css' );
+}
+add_action( 'wp_enqueue_scripts', 'add_tmm_support_scripts' );
+
 // Create "tmm_support_ticket" post type
 if ( ! function_exists('create_tmm_support_ticket_cpt') ) {
 
@@ -221,7 +228,7 @@ function display_customer_support_tickets() {
 							<td class="support-ticket-title">
 								<a href="<?php the_permalink(); ?>" title="<?php the_excerpt(); ?>"><?php the_title(); ?></a> <?php edit_post_link('edit','[',']'); ?>
 							</td>
-							<td class="support-ticket-last-activity-date" style="text-align:left; white-space:nowrap;">
+							<td class="support-ticket-last-activity-date">
 								<?php if (!$comments) {
 									echo 'Request submitted on ' . get_the_date('D M j, Y \a\t g:i A') . ' by ' . get_the_author_meta( 'user_firstname', $post->post_author ) . ' ' . get_the_author_meta( 'user_lastname', $post->post_author );
 								} else { ?>
@@ -272,6 +279,5 @@ add_action ('woocommerce_before_my_account', 'display_customer_support_tickets')
 	* Make pagination prettier.
 	* Make it so when they click "Active" or "Closed" taxonomy, it only shows their tickets.
 	* Display "Active" tickets first.
-	* Add css to fix table style issues: td{word-wrap:break-word;white-space:normal} table{table-layout:fixed;}
 }
 */ 
